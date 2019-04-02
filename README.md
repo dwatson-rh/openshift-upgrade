@@ -111,8 +111,6 @@ sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE
 sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE} -m post_verify_integrated_registry_resolves
 sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE} -m post_verify_rsyslog_still_logging
 sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE} -m post_restore_yum_repo
-sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE} -m post_update_cleanup_script
-sudo docker exec -t custom-ose-ansible-$OCP_VER ./upgrade_ocp.sh -i ${HOSTS_FILE} -m post_start_forward_events_service
 ```
 
 ### Some pre-built "repair" Steps
