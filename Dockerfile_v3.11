@@ -1,0 +1,68 @@
+FROM registry.access.redhat.com/openshift3/ose-ansible:v3.11.59-2
+
+
+MAINTAINER <enter your name>
+
+ARG GID
+ARG GROUP
+ARG UID
+ARG USER
+
+ENV GID $GID
+ENV GROUP $GROUP
+ENV UID $UID
+ENV USER $USER
+ENV GIT_ROOT=/opt/app-root/src
+ENV ANSIBLE_HOST_FILES_BRANCH=automated_installation
+WORKDIR /opt/app-root/src
+
+COPY upgrade_ocp.sh /opt/app-root/src/
+COPY upgrade_ocp_entrypoint.sh /opt/app-root/src/
+RUN mkdir /opt/app-root/src/.ansible
+USER root
+
+RUN echo groupadd -g $GID $GROUP
+RUN echo useradd -ms /bin/bash -g $GID -u $UID $USER 
+RUN groupadd -g $GID $GROUP
+RUN useradd -lms /bin/bash -g $GID -u $UID $USER 
+
+COPY rh_ocp.repo /etc/yum.repos.d/rh_ocp.repo
+RUN yum-config-manager --enable 'ocp-rhel-7-server-rpms'
+RUN yum clean all
+RUN ls /var/cache/yum 1>/dev/null 2>&1 && /bin/rm -rf /var/cache/yum
+
+RUN yum install -y openssh-clients
+RUN yum install -y bc
+
+
+#ENV http_proxy "http://my.web.proxy:8080"
+#ENV https_proxy "https://my.web.proxy:8080"
+
+RUN  echo "    IdentityFile /opt/app-root/src/.ssh/id_rsa" >> /etc/ssh/ssh_config
+RUN  echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+
+RUN chown -R $USER /opt/app-root/src/
+RUN chmod 755 -R /opt/app-root/src
+RUN chmod 777 -R /opt/app-root/src/.ansible
+
+USER $USER
+RUN sleep 1
+
+# Copy ansible configuration file
+# For ose-ansible:v3.9.43-2
+COPY ansible.cfg /usr/share/atomic-openshift-utils/ansible.cfg
+# For ose-ansible:v3.11+
+COPY ansible.cfg /usr/share/ansible/openshift-ansible/ansible.cfg
+
+# Reset ownership &  permissions
+USER root
+RUN chown -R $USER /opt/app-root/src/
+RUN chown -R $USER /usr/share/ansible/openshift-ansible/
+RUN chown -R $USER /usr/share/atomic-openshift-utils
+RUN chmod 755 -R /opt/app-root/src
+RUN chmod 777 -R /opt/app-root/src/.ansible
+RUN chmod 777 /etc/ansible/ansible.cfg
+USER $USER
+
+
+ENTRYPOINT [ "./upgrade_ocp_entrypoint.sh" ]

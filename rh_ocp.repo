@@ -1,0 +1,7 @@
+[ocp-rhel-7-server-rpms]
+name=rhel-7-server-rpms
+baseurl=http://mylocal.yumrepo.fqdn/repos/ocp310/rhel-7-server-rpms
+enabled=1
+gpgcheck=0
+
+
